@@ -82,7 +82,7 @@ speciesKey <- AllmeasuresDF[,c("Species_Code","Clade")]
 head(meanTableDF <- merge(meanTableDF,unique(speciesKey),by="Species_Code",all.x=TRUE,all.y=FALSE))
 write.table(meanTableDF, file = 'allData.means.csv', append = F, quote = F, sep = ",", col.names = T, row.names = F)
 
-#stealing some code to figure out which sample has the median value
+#some code to figure out which sample has the median value
 whichmedian <- function(x) which.min(abs(x - median(x)))
 
 #set NAs to unknown for side
@@ -118,69 +118,7 @@ scale_x_discrete(limits=c("ferns", "gymnosperms", "early_diverging_angiosperms",
 labs(x = "", y = "Aspect Ratio") + ylim(0,1) + theme_minimal()
 r
 
-##ok, making correlations plots, remember to save FREQUENTLY
-#Correlation plots to make:
-#1. cell vs leaf AR
-#2. cell area vs solidity
-#3. leaf area vs solidity
-#4. cell area vs AR
-#5. cell AR vs solidity
-
-#draw plots
-#cell AR vs cell Solidity
-#old command
-ggplot(meanTableDF[!is.na(meanTableDF$Clade),],aes(x=AR_Mean,y=Sol_Mean)) + geom_point(aes(color = Clade)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
-theme_minimal() + labs(x="Cell Aspect Ratio Mean",y="Cell Solidity Mean")
-
-
-
-model <- lm(Sol_Mean ~ AR_Mean, meanTableDF[!is.na(meanTableDF$Clade),])
-summary(model)
-#Call:
-#lm(formula = Sol_Mean ~ AR_Mean, data = meanTableDF[!is.na(meanTableDF$Clade), 
-#    ])
-#
-#Residuals:
-#     Min       1Q   Median       3Q      Max 
-#-0.27424 -0.05851  0.01808  0.07316  0.16808 
-#
-#Coefficients:
-#            Estimate Std. Error t value Pr(>|t|)    
-#(Intercept)  0.84632    0.02091  40.483   <2e-16 ***
-#AR_Mean     -0.06268    0.03486  -1.798   0.0733 .  
-#---
-#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-#
-#Residual standard error: 0.09731 on 251 degrees of freedom
-#Multiple R-squared:  0.01272,   Adjusted R-squared:  0.008786 
-#F-statistic: 3.234 on 1 and 251 DF,  p-value: 0.07334
-
-#cell area vs cell solidity
-ggplot(meanTableDF[!is.na(meanTableDF$Clade),],aes(x=Area_Mean,y=Sol_Mean)) + geom_point(aes(color = Clade)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
-theme_minimal() + labs(x="Cell Area Mean",y="Cell Solidity Mean")
-model <- lm(Sol_Mean ~ Area_Mean, meanTableDF[!is.na(meanTableDF$Clade),])
-summary(model)
-#
-#Call:
-#lm(formula = Sol_Mean ~ Area_Mean, data = meanTableDF[!is.na(meanTableDF$Clade), 
-#    ])
-#
-#Residuals:
-#      Min        1Q    Median        3Q       Max 
-#-0.214099 -0.063545  0.008146  0.063613  0.195958 
-#
-#Coefficients:
-#              Estimate Std. Error t value Pr(>|t|)    
-#(Intercept)  8.745e-01  9.513e-03  91.921  < 2e-16 ***
-#Area_Mean   -3.305e-06  4.016e-07  -8.229 1.03e-14 ***
-#---
-#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-#
-#Residual standard error: 0.08691 on 251 degrees of freedom
-#Multiple R-squared:  0.2125,    Adjusted R-squared:  0.2093 
-#F-statistic: 67.72 on 1 and 251 DF,  p-value: 1.03e-14
-
-#redo area with scales
+#do area with scales
 scale <- read.table("CellMagnifications_GraceAndJeff.txt",header=F)
 colnames(scale) = c("sample","Magn")
 scale$Scale <- 2700
@@ -198,14 +136,6 @@ RVscaledMeasuresDF$Scaled_Area <- RVscaledMeasuresDF$Area
 
 #remake measures table with scaled area
 AllScaledMeasuresDF <- rbind(RVscaledMeasuresDF,GPscaledMeasuresDF)
-
-#all the right size
-#> dim(GPscaledMeasuresDF)
-#[1] 4904   11
-#> dim(RVscaledMeasuresDF)
-#[1] 6693   11
-#> dim(AllScaledMeasuresDF)
-#[1] 11597    11
 
 names(AllScaledMeasuresDF)[1] <- "Species_Code"
 names(AllScaledMeasuresDF)[7] <- "Side"
@@ -251,12 +181,15 @@ allData.means.scaled <- read.csv("allData.means.scaled.csv",header=T)
 allData.means.scaled$Clade[allData.means.scaled$Clade == "fern"] = "ferns"
 write.table(allData.means.scaled, file = 'allData.means.scaled.csv', append = F, quote = F, sep = ",", col.names = T, row.names = F)
 
-#ok, back to correlation plots
-#cell AR vs Solidity
-#ggplot(allData.means.scaled[!is.na(allData.means.scaled$Clade),],aes(x=AR_Mean,y=Sol_Mean)) + geom_point(aes(color = Clade, shape="circle",alpha=0.5)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
-#theme_minimal() + labs(x="Cell Aspect Ratio Mean",y="Cell Solidity Mean") + 
-#scale_color_manual(breaks = c("ferns", "gymnosperms", "early_diverging_angiosperms", "eudicots", "monocots"), values=c("cyan", "green", "blue", "violet", "red"))
+##ok, making correlations plots, remember to save FREQUENTLY
+#Correlation plots to make:
+#1. cell vs leaf AR
+#2. cell area vs solidity
+#3. leaf area vs solidity
+#4. cell area vs AR
+#5. cell AR vs solidity
 
+#cell AR vs Solidity
 pdf("Fig4_CellARvsCellSolidity.pdf",h=15,w=20)
 ggplot(allData.means.scaled[!is.na(allData.means.scaled$Clade),],aes(x=AR_Mean,y=Sol_Mean)) + geom_jitter(aes(color = Clade, shape="circle",size=10)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
 theme_minimal() + labs(x="Cell Aspect Ratio Mean",y="Cell Solidity Mean") + 
@@ -266,57 +199,13 @@ dev.off()
 
 model <- lm(Sol_Mean ~ AR_Mean, allData.means.scaled[!is.na(allData.means.scaled$Clade),])
 summary(model)
-#Call:
-#lm(formula = Sol_Mean ~ AR_Mean, data = allData.means.scaled[!is.na(allData.means.scaled$Clade), 
-#    ])
-#
-#Residuals:
-#     Min       1Q   Median       3Q      Max 
-#-0.27929 -0.06215  0.01893  0.07211  0.15868 
-#
-#Coefficients:
-#            Estimate Std. Error t value Pr(>|t|)    
-#(Intercept)  0.84500    0.02139  39.500   <2e-16 ***
-#AR_Mean     -0.04827    0.03541  -1.363    0.174    
-#---
-#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-#
-#Residual standard error: 0.09809 on 261 degrees of freedom
-#Multiple R-squared:  0.007072,  Adjusted R-squared:  0.003267 
-#F-statistic: 1.859 on 1 and 261 DF,  p-value: 0.1739
 
 cor.test(x=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Sol_Mean"],y=allData.means.scaled[!is.na(allData.means.scaled$Clade),"AR_Mean"],use="complete.obs",method="pearson")
-####
-        Pearson's product-moment correlation
 
-data:  allData.means.scaled[!is.na(allData.means.scaled$Clade), "Sol_Mean"] and allData.means.scaled[!is.na(allData.means.scaled$Clade), "AR_Mean"]
-t = -1.3634, df = 261, p-value = 0.1739
-alternative hypothesis: true correlation is not equal to 0
-95 percent confidence interval:
- -0.20298609  0.03724137
-sample estimates:
-        cor 
--0.08409412 
-####
 cor.test(x=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Sol_Mean"],y=allData.means.scaled[!is.na(allData.means.scaled$Clade),"AR_Mean"],use="complete.obs",method="spearman")
-####
 
-        Spearman's rank correlation rho
-
-data:  allData.means.scaled[!is.na(allData.means.scaled$Clade), "Sol_Mean"] and allData.means.scaled[!is.na(allData.means.scaled$Clade), "AR_Mean"]
-S = 3008900, p-value = 0.9025
-alternative hypothesis: true rho is not equal to 0
-sample estimates:
-        rho 
-0.007586752 
-
-####
 
 #cell area vs solidity
-#ggplot(allData.means.scaled[!is.na(allData.means.scaled$Clade),],aes(x=Scaled_Area_Mean,y=Sol_Mean)) + geom_point(aes(color = Clade, shape="circle",alpha=0.5)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
-#theme_minimal() + labs(x="Cell Area Mean",y="Cell Solidity Mean") + 
-#scale_color_manual(breaks = c("ferns", "gymnosperms", "early_diverging_angiosperms", "eudicots", "monocots"), values=c("cyan", "green", "blue", "violet", "red"))
-
 pdf("Fig4_CellAreavsCellSolidity.pdf",h=15,w=20)
 ggplot(allData.means.scaled[!is.na(allData.means.scaled$Clade),],aes(x=Scaled_Area_Mean,y=Sol_Mean)) + geom_jitter(aes(color = Clade, shape="circle",size=10)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
 theme_minimal() + labs(x="Cell Area Mean",y="Cell Solidity Mean") + 
@@ -326,58 +215,12 @@ dev.off()
 
 model <- lm(Sol_Mean ~ Scaled_Area_Mean, allData.means.scaled[!is.na(allData.means.scaled$Clade),])
 summary(model)
-#Call:
-#lm(formula = Sol_Mean ~ Scaled_Area_Mean, data = allData.means.scaled[!is.na(allData.means.scaled$Clade), 
-#    ])
-#
-#Residuals:
-#     Min       1Q   Median       3Q      Max 
-#-0.26576 -0.06012  0.02088  0.07826  0.15768 
-#
-#Coefficients:
-#                  Estimate Std. Error t value Pr(>|t|)    
-#(Intercept)      8.099e-01  8.259e-03  98.063   <2e-16 ***
-#Scaled_Area_Mean 1.217e-07  6.246e-07   0.195    0.846    
-#---
-#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-#
-#Residual standard error: 0.0981 on 244 degrees of freedom
-#  (17 observations deleted due to missingness)
-#Multiple R-squared:  0.0001556, Adjusted R-squared:  -0.003942 
-#F-statistic: 0.03798 on 1 and 244 DF,  p-value: 0.8456
 
 cor.test(x=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Sol_Mean"],y=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Scaled_Area_Mean"],use="complete.obs",method="pearson")
-####
 
-        Pearson's product-moment correlation
-
-data:  allData.means.scaled[!is.na(allData.means.scaled$Clade), "Sol_Mean"] and allData.means.scaled[!is.na(allData.means.scaled$Clade), "Scaled_Area_Mean"]
-t = 0.19489, df = 244, p-value = 0.8456
-alternative hypothesis: true correlation is not equal to 0
-95 percent confidence interval:
- -0.1127736  0.1373349
-sample estimates:
-       cor 
-0.01247579 
-####
 cor.test(x=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Sol_Mean"],y=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Scaled_Area_Mean"],use="complete.obs",method="spearman")
-####
-
-        Spearman's rank correlation rho
-
-data:  allData.means.scaled[!is.na(allData.means.scaled$Clade), "Sol_Mean"] and allData.means.scaled[!is.na(allData.means.scaled$Clade), "Scaled_Area_Mean"]
-S = 2543000, p-value = 0.6969
-alternative hypothesis: true rho is not equal to 0
-sample estimates:
-        rho 
--0.02493919 
-####
 
 #cell area vs aspect ratio
-#ggplot(allData.means.scaled[!is.na(allData.means.scaled$Clade),],aes(x=Scaled_Area_Mean,y=AR_Mean)) + geom_point(aes(color = Clade, shape="circle",alpha=0.5)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
-#theme_minimal() + labs(x="Cell Area Mean",y="Cell Aspect Ratio Mean") + 
-#scale_color_manual(breaks = c("ferns", "gymnosperms", "early_diverging_angiosperms", "eudicots", "monocots"), values=c("cyan", "green", "blue", "violet", "red"))
-
 pdf("Fig4_CellAreavsCellAR.pdf",h=15,w=20)
 ggplot(allData.means.scaled[!is.na(allData.means.scaled$Clade),],aes(x=Scaled_Area_Mean,y=AR_Mean)) + geom_jitter(aes(color = Clade, shape="circle",size=10)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
 theme_minimal() + labs(x="Cell Area Mean",y="Cell Aspect Ratio Mean") + 
@@ -387,52 +230,10 @@ dev.off()
 
 model <- lm(AR_Mean ~ Scaled_Area_Mean, allData.means.scaled[!is.na(allData.means.scaled$Clade),])
 summary(model)
-#Call:
-#lm(formula = AR_Mean ~ Scaled_Area_Mean, data = allData.means.scaled[!is.na(allData.means.scaled$Clade), 
-#    ])
-#
-#Residuals:
-#     Min       1Q   Median       3Q      Max 
-#-0.50218 -0.03059  0.06638  0.11052  0.23731 
-#
-#Coefficients:
-#                  Estimate Std. Error t value Pr(>|t|)    
-#(Intercept)      5.648e-01  1.471e-02  38.383   <2e-16 ***
-#Scaled_Area_Mean 1.173e-06  1.113e-06   1.054    0.293    
-#---
-#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-#
-#Residual standard error: 0.1748 on 244 degrees of freedom
-#  (17 observations deleted due to missingness)
-#Multiple R-squared:  0.004534,  Adjusted R-squared:  0.0004538 
-#F-statistic: 1.111 on 1 and 244 DF,  p-value: 0.2929
 
 cor.test(x=allData.means.scaled[!is.na(allData.means.scaled$Clade),"AR_Mean"],y=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Scaled_Area_Mean"],use="complete.obs",method="pearson")
-####
 
-        Pearson's product-moment correlation
-
-data:  allData.means.scaled[!is.na(allData.means.scaled$Clade), "AR_Mean"] and allData.means.scaled[!is.na(allData.means.scaled$Clade), "Scaled_Area_Mean"]
-t = 1.0541, df = 244, p-value = 0.2929
-alternative hypothesis: true correlation is not equal to 0
-95 percent confidence interval:
- -0.05823217  0.19079818
-sample estimates:
-       cor 
-0.06733159 
-####
 cor.test(x=allData.means.scaled[!is.na(allData.means.scaled$Clade),"AR_Mean"],y=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Scaled_Area_Mean"],use="complete.obs",method="spearman")
-####
-
-        Spearman's rank correlation rho
-
-data:  allData.means.scaled[!is.na(allData.means.scaled$Clade), "AR_Mean"] and allData.means.scaled[!is.na(allData.means.scaled$Clade), "Scaled_Area_Mean"]
-S = 2027700, p-value = 0.00408
-alternative hypothesis: true rho is not equal to 0
-sample estimates:
-      rho 
-0.1827287 
-####
 
 ##read in leaf data and calculate leaf area, solidity, and AR
 
@@ -456,7 +257,7 @@ LeafMeasuresDF$Sample_Number <- names(allLeafCoo)
 LeafMeasuresDF$Sample_Number <- sapply(strsplit(LeafMeasuresDF$Sample_Number,split=" "),"[",1)
 LeafMeasuresDF$Sample_Number <- gsub(pattern="-leaf|-ab-leaf|-ad-leaf",rep="",LeafMeasuresDF$Sample_Number)
 
-#Calcuate means (easiest way to deal with extra GP leaves)
+#Calcuate means
 Species <- unique(LeafMeasuresDF$Sample_Number)
 meanTable <- matrix(data = NA, nrow = length(Species), ncol = 3)
 for(i in 1:length(Species)){
@@ -488,57 +289,11 @@ dev.off()
 model <- lm(Leaf_AR_Mean ~ AR_Mean, cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Leaf_AR_Mean < 1,])
 summary(model)
 
-###
-Call:
-lm(formula = Leaf_AR_Mean ~ AR_Mean, data = cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & 
-    cellAndLeafMeansDF$Leaf_AR_Mean < 1, ])
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--0.36215 -0.14955 -0.01208  0.10770  0.58021 
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  0.08422    0.07201   1.170    0.244    
-AR_Mean      0.53480    0.11429   4.679 5.81e-06 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 0.2042 on 172 degrees of freedom
-Multiple R-squared:  0.1129,    Adjusted R-squared:  0.1078 
-F-statistic:  21.9 on 1 and 172 DF,  p-value: 5.809e-06
-###
-
 cor.test(x=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Leaf_AR_Mean < 1,"AR_Mean"],y=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Leaf_AR_Mean < 1,"Leaf_AR_Mean"],use="complete.obs",method="pearson")
-####
-        Pearson's product-moment correlation
 
-data:  cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Leaf_AR_Mean <  and cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Leaf_AR_Mean <     1, "AR_Mean"] and     1, "Leaf_AR_Mean"]
-t = 4.6792, df = 172, p-value = 5.809e-06
-alternative hypothesis: true correlation is not equal to 0
-95 percent confidence interval:
- 0.1971238 0.4617259
-sample estimates:
-      cor 
-0.3360389 
-####
 cor.test(x=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Leaf_AR_Mean < 1,"AR_Mean"],y=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Leaf_AR_Mean < 1,"Leaf_AR_Mean"],use="complete.obs",method="spearman")
-####
-
-        Spearman's rank correlation rho
-
-data:  cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Leaf_AR_Mean <  and cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Leaf_AR_Mean <     1, "AR_Mean"] and     1, "Leaf_AR_Mean"]
-S = 704550, p-value = 0.009078
-alternative hypothesis: true rho is not equal to 0
-sample estimates:
-     rho 
-0.197533 
-####
 
 #Make leaf area vs solidity plot
-#ggplot(cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),],aes(x=Leaf_Area_Mean,y=Leaf_Sol_Mean)) + geom_point(aes(color = Clade.x, shape="circle",alpha=0.5)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
-#theme_minimal() + labs(x="Leaf Area",y="Leaf Solidity") + 
-#scale_color_manual(breaks = c("ferns", "gymnosperms", "early_diverging_angiosperms", "eudicots", "monocots"), values=c("cyan", "green", "blue", "violet", "red"))
 pdf("Fig4_LeafAreavsLeafSolidity.pdf",h=15,w=20)
 ggplot(cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),],aes(x=Leaf_Area_Mean,y=Leaf_Sol_Mean)) + geom_jitter(aes(color = Clade.x, shape="circle",size=10)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
 theme_minimal() + labs(x="Leaf Area",y="Leaf Solidity") + 
@@ -546,66 +301,18 @@ scale_color_manual(breaks = c("ferns", "gymnosperms", "early_diverging_angiosper
 theme(axis.text = element_text(size = 20), axis.title = element_text(size = 30)) + guides(colour=FALSE,shape = FALSE, size = FALSE)
 dev.off()
 
-
-
 model <- lm(Leaf_Sol_Mean ~ Leaf_Area_Mean, cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),])
 summary(model)
-###
-Call:
-lm(formula = Leaf_Sol_Mean ~ Leaf_Area_Mean, data = cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x), 
-    ])
 
-Residuals:
-     Min       1Q   Median       3Q      Max 
--0.74227 -0.01764  0.05641  0.08722  0.11330 
-
-Coefficients:
-                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)    8.749e-01  1.455e-02  60.150   <2e-16 ***
-Leaf_Area_Mean 2.855e-08  2.999e-08   0.952    0.343    
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 0.1477 on 173 degrees of freedom
-Multiple R-squared:  0.00521,   Adjusted R-squared:  -0.0005407 
-F-statistic: 0.906 on 1 and 173 DF,  p-value: 0.3425
-###
 cor.test(x=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),"Leaf_Area_Mean"],y=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),"Leaf_Sol_Mean"],use="complete.obs",method="pearson")
-####
 
-        Pearson's product-moment correlation
-
-data:  cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x), "Leaf_Area_Mean"] and cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x), "Leaf_Sol_Mean"]
-t = 0.95182, df = 173, p-value = 0.3425
-alternative hypothesis: true correlation is not equal to 0
-95 percent confidence interval:
- -0.0769904  0.2181841
-sample estimates:
-       cor 
-0.07217706 
-####
 cor.test(x=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),"Leaf_Area_Mean"],y=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),"Leaf_Sol_Mean"],use="complete.obs",method="spearman")
-####
 
-        Spearman's rank correlation rho
-
-data:  cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x), "Leaf_Area_Mean"] and cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x), "Leaf_Sol_Mean"]
-S = 755720, p-value = 0.04206
-alternative hypothesis: true rho is not equal to 0
-sample estimates:
-     rho 
-0.153923 
-####
-
-#Redo cell area vs aspect ratio and cell area vs solidity with log area
+#cell area vs aspect ratio and cell area vs solidity with log area
 head(allData.means.scaled)
 allData.means.scaled$Log_10_Area_Mean <- log10(allData.means.scaled$Scaled_Area_Mean)
 
 #plot log cell area vs aspect ratio
-#ggplot(allData.means.scaled[!is.na(allData.means.scaled$Clade),],aes(x=Log_10_Area_Mean,y=AR_Mean)) + geom_point(aes(color = Clade, shape="circle",alpha=0.5)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
-#theme_minimal() + labs(x="Log10(Cell Area Mean)",y="Cell Aspect Ratio Mean") + 
-#scale_color_manual(breaks = c("ferns", "gymnosperms", "early_diverging_angiosperms", "eudicots", "monocots"), values=c("cyan", "green", "blue", "violet", "red"))
-
 pdf("Fig4_LogCellAreavsCellAR.pdf",h=15,w=20)
 ggplot(allData.means.scaled[!is.na(allData.means.scaled$Clade),],aes(x=Log_10_Area_Mean,y=AR_Mean)) + geom_jitter(aes(color = Clade, shape="circle",size=10)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
 theme_minimal() + labs(x="Log Cell Area Mean",y="Cell Aspect Ratio Mean") + 
@@ -615,60 +322,12 @@ dev.off()
 
 model <- lm(AR_Mean ~ Log_10_Area_Mean, allData.means.scaled[!is.na(allData.means.scaled$Clade),])
 summary(model)
-##
-Call:
-lm(formula = AR_Mean ~ Log_10_Area_Mean, data = allData.means.scaled[!is.na(allData.means.scaled$Clade), 
-    ])
 
-Residuals:
-     Min       1Q   Median       3Q      Max 
--0.50373 -0.03368  0.06353  0.11391  0.23707 
-
-Coefficients:
-                 Estimate Std. Error t value Pr(>|t|)    
-(Intercept)       0.46668    0.06962   6.703  1.4e-10 ***
-Log_10_Area_Mean  0.02981    0.01893   1.575    0.117    
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 0.1743 on 244 degrees of freedom
-  (17 observations deleted due to missingness)
-Multiple R-squared:  0.01007,   Adjusted R-squared:  0.006009 
-F-statistic: 2.481 on 1 and 244 DF,  p-value: 0.1165
-##
 cor.test(x=allData.means.scaled[!is.na(allData.means.scaled$Clade),"AR_Mean"],y=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Log_10_Area_Mean"],use="complete.obs",method="pearson")
-####
-
-        Pearson's product-moment correlation
-
-data:  allData.means.scaled[!is.na(allData.means.scaled$Clade), "AR_Mean"] and allData.means.scaled[!is.na(allData.means.scaled$Clade), "Log_10_Area_Mean"]
-t = 1.5751, df = 244, p-value = 0.1165
-alternative hypothesis: true correlation is not equal to 0
-95 percent confidence interval:
- -0.02506022  0.22260763
-sample estimates:
-      cor 
-0.1003276 
-####
 
 cor.test(x=allData.means.scaled[!is.na(allData.means.scaled$Clade),"AR_Mean"],y=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Log_10_Area_Mean"],use="complete.obs",method="spearman")
-####
-
-        Spearman's rank correlation rho
-
-data:  allData.means.scaled[!is.na(allData.means.scaled$Clade), "AR_Mean"] and allData.means.scaled[!is.na(allData.means.scaled$Clade), "Log_10_Area_Mean"]
-S = 2027700, p-value = 0.00408
-alternative hypothesis: true rho is not equal to 0
-sample estimates:
-      rho 
-0.1827287
-####
-
 
 #plot log cell area vs solidity
-#ggplot(allData.means.scaled[!is.na(allData.means.scaled$Clade),],aes(x=Log_10_Area_Mean,y=Sol_Mean)) + geom_point(aes(color = Clade, shape="circle",alpha=0.5)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
-#theme_minimal() + labs(x="Log10(Cell Area Mean)",y="Cell Solidity Mean") + 
-#scale_color_manual(breaks = c("ferns", "gymnosperms", "early_diverging_angiosperms", "eudicots", "monocots"), values=c("cyan", "green", "blue", "violet", "red"))
 pdf("Fig4_LogCellAreavsCellSolidity.pdf",h=15,w=20)
 ggplot(allData.means.scaled[!is.na(allData.means.scaled$Clade),],aes(x=Log_10_Area_Mean,y=Sol_Mean)) + geom_jitter(aes(color = Clade, shape="circle",size=10)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
 theme_minimal() + labs(x="Log10 Cell Area Mean",y="Cell Solidity Mean") + 
@@ -678,63 +337,16 @@ dev.off()
 
 model <- lm(Sol_Mean ~ Log_10_Area_Mean, allData.means.scaled[!is.na(allData.means.scaled$Clade),])
 summary(model)
-##
-Call:
-lm(formula = Sol_Mean ~ Log_10_Area_Mean, data = allData.means.scaled[!is.na(allData.means.scaled$Clade), 
-    ])
 
-Residuals:
-     Min       1Q   Median       3Q      Max 
--0.26264 -0.05951  0.01915  0.07672  0.16108 
-
-Coefficients:
-                 Estimate Std. Error t value Pr(>|t|)    
-(Intercept)      0.782543   0.039145  19.991   <2e-16 ***
-Log_10_Area_Mean 0.007832   0.010643   0.736    0.463    
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 0.098 on 244 degrees of freedom
-  (17 observations deleted due to missingness)
-Multiple R-squared:  0.002214,  Adjusted R-squared:  -0.001875 
-F-statistic: 0.5415 on 1 and 244 DF,  p-value: 0.4625
-##
 cor.test(x=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Sol_Mean"],y=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Log_10_Area_Mean"],use="complete.obs",method="pearson")
-####
-
-        Pearson's product-moment correlation
-
-data:  allData.means.scaled[!is.na(allData.means.scaled$Clade), "Sol_Mean"] and allData.means.scaled[!is.na(allData.means.scaled$Clade), "Log_10_Area_Mean"]
-t = 0.73589, df = 244, p-value = 0.4625
-alternative hypothesis: true correlation is not equal to 0
-95 percent confidence interval:
- -0.07847702  0.17112442
-sample estimates:
-       cor 
-0.04705825 
-####
 
 cor.test(x=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Sol_Mean"],y=allData.means.scaled[!is.na(allData.means.scaled$Clade),"Log_10_Area_Mean"],use="complete.obs",method="spearman")
-####
-
-        Spearman's rank correlation rho
-
-data:  allData.means.scaled[!is.na(allData.means.scaled$Clade), "Sol_Mean"] and allData.means.scaled[!is.na(allData.means.scaled$Clade), "Log_10_Area_Mean"]
-S = 2543000, p-value = 0.6969
-alternative hypothesis: true rho is not equal to 0
-sample estimates:
-        rho 
--0.02493919 
-####
 
 #need to do log leaf area
 head(cellAndLeafMeansDF)
 cellAndLeafMeansDF$Log_10_Leaf_Area_Mean <- log10(cellAndLeafMeansDF$Leaf_Area_Mean)
 
 #Make log10 leaf area vs solidity plot
-#ggplot(cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),],aes(x=Log_10_Leaf_Area_Mean,y=Leaf_Sol_Mean)) + geom_point(aes(color = Clade.x, shape="circle",alpha=0.5)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
-#theme_minimal() + labs(x="Log10 Leaf Area",y="Leaf Solidity") + 
-#scale_color_manual(breaks = c("ferns", "gymnosperms", "early_diverging_angiosperms", "eudicots", "monocots"), values=c("cyan", "green", "blue", "violet", "red"))
 pdf("Fig4_LogLeafAreavsLeafSolidity.pdf",h=15,w=20)
 ggplot(cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),],aes(x=Log_10_Leaf_Area_Mean,y=Leaf_Sol_Mean)) + geom_jitter(aes(color = Clade.x, shape="circle",size=10)) + geom_smooth(method="lm",se=FALSE, colour="black") + 
 theme_minimal() + labs(x="Log10 Leaf Area",y="Leaf Solidity") + 
@@ -744,53 +356,10 @@ dev.off()
 
 model <- lm(Leaf_Sol_Mean ~ Log_10_Leaf_Area_Mean, cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),])
 summary(model)
-###
-Call:
-lm(formula = Leaf_Sol_Mean ~ Log_10_Leaf_Area_Mean, data = cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x), 
-    ])
 
-Residuals:
-     Min       1Q   Median       3Q      Max 
--0.73162 -0.01992  0.05645  0.08257  0.12908 
-
-Coefficients:
-                      Estimate Std. Error t value Pr(>|t|)    
-(Intercept)            0.70985    0.08813   8.055 1.24e-13 ***
-Log_10_Leaf_Area_Mean  0.03385    0.01702   1.989   0.0483 *  
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 0.1464 on 173 degrees of freedom
-Multiple R-squared:  0.02236,   Adjusted R-squared:  0.01671 
-F-statistic: 3.957 on 1 and 173 DF,  p-value: 0.04825
-###
 cor.test(x=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),"Log_10_Leaf_Area_Mean"],y=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),"Leaf_Sol_Mean"],use="complete.obs",method="pearson")
-####
-
-        Pearson's product-moment correlation
-
-data:  cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x), "Log_10_Leaf_Area_Mean"] and cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x), "Leaf_Sol_Mean"]
-t = 1.9892, df = 173, p-value = 0.04825
-alternative hypothesis: true correlation is not equal to 0
-95 percent confidence interval:
- 0.00122072 0.29141549
-sample estimates:
-      cor 
-0.1495368 
-####
 
 cor.test(x=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),"Log_10_Leaf_Area_Mean"],y=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x),"Leaf_Sol_Mean"],use="complete.obs",method="spearman")
-####
-
-        Spearman's rank correlation rho
-
-data:  cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x), "Log_10_Leaf_Area_Mean"] and cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x), "Leaf_Sol_Mean"]
-S = 755720, p-value = 0.04206
-alternative hypothesis: true rho is not equal to 0
-sample estimates:
-     rho 
-0.153923 
-####
 
 #Make cell AR vs leaf AR plot w/o eudicots
 pdf("Fig4_CellARvsLeafAR_noEudicots.pdf",h=15,w=20)
@@ -801,55 +370,13 @@ theme(axis.text = element_text(size = 20), axis.title = element_text(size = 30))
 dev.off()
 model <- lm(Leaf_AR_Mean ~ AR_Mean, cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Clade.x != "eudicots" & cellAndLeafMeansDF$Leaf_AR_Mean < 1,])
 summary(model)
-##
-Call:
-lm(formula = Leaf_AR_Mean ~ AR_Mean, data = cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & 
-    cellAndLeafMeansDF$Clade.x != "eudicots", ])
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--0.2961 -0.1163 -0.0307  0.1128  0.6127 
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)   
-(Intercept)  0.11816    0.07572   1.560  0.12366   
-AR_Mean      0.41738    0.13541   3.082  0.00305 **
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 0.1972 on 63 degrees of freedom
-Multiple R-squared:  0.131,     Adjusted R-squared:  0.1172 
-F-statistic: 9.501 on 1 and 63 DF,  p-value: 0.003046
-##
 
 cor.test(x=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Clade.x != "eudicots" & cellAndLeafMeansDF$Leaf_AR_Mean < 1,"AR_Mean"],y=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Clade.x != "eudicots","Leaf_AR_Mean"],use="complete.obs",method="pearson")
-####
-        Pearson's product-moment correlation
 
-data:  cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Clade.x !=  and cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Clade.x != "eudicots" & cellAndLeafMeansDF$Leaf_AR_Mean < 1, "AR_Mean"] and     "eudicots", "Leaf_AR_Mean"]
-t = 3.0823, df = 63, p-value = 0.003046
-alternative hypothesis: true correlation is not equal to 0
-95 percent confidence interval:
- 0.1295342 0.5567408
-sample estimates:
-      cor 
-0.3619967 
-####
 cor.test(x=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Clade.x != "eudicots" & cellAndLeafMeansDF$Leaf_AR_Mean < 1,"AR_Mean"],y=cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Clade.x != "eudicots" & cellAndLeafMeansDF$Leaf_AR_Mean < 1,"Leaf_AR_Mean"],use="complete.obs",method="spearman")
-####
-
-        Spearman's rank correlation rho
-
-data:  cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Clade.x !=  and cellAndLeafMeansDF[!is.na(cellAndLeafMeansDF$Clade.x) & cellAndLeafMeansDF$Clade.x !=     "eudicots" & cellAndLeafMeansDF$Leaf_AR_Mean < 1, "AR_Mean"] and     "eudicots" & cellAndLeafMeansDF$Leaf_AR_Mean < 1, "Leaf_AR_Mean"]
-S = 33560, p-value = 0.03211
-alternative hypothesis: true rho is not equal to 0
-sample estimates:
-      rho 
-0.2666084 
-####
 
 #Generate cell PCAs (do this using Momocs code to get pretty figures)
-#need to get circularitynorm() results because circularity() wasn't enough!
+#need to get circularitynorm() results 
 l_circnorm<-measure(l,coo_circularitynorm)
 gpcells_circnorm<-measure(gp_cells,coo_circularitynorm)
 rvCircNorm <- data.frame(l_circnorm$coe)
@@ -1020,8 +547,7 @@ colnames(LeafMeasuresDF.log) = c("Species Code","Leaf Log Area","Leaf Aspect Rat
 suppTable1.precursor <- merge(meansBySide.log, LeafMeasuresDF.log, by="Species Code", all = TRUE)
 View(suppTable1.precursor)
 
-#I messed up; did not scale the leaves
-#Rozi's code multiplies leaf area by (1/118)^2
+#Forgot to scale the leaves
 LeafMeasuresDF$Scaled_Area = LeafMeasuresDF$Area * (1/118)^2
 LeafMeasuresDF$LogScaledArea = log10(LeafMeasuresDF$Scaled_Area)
 head(LeafMeasuresDF)
@@ -1029,6 +555,6 @@ head(LeafMeasuresDF)
 #redid merge, now save before continuing
 write.csv(suppTable1.precursor,file  = "SupplTable1.precursor.csv")
 
-#Just need to redo leaf area vs leaf solidity
+#Redo leaf area vs leaf solidity
 #Luckily everything else should be the same
 #And since area is scaled by a factor, shouldn't affect the p-values for correlations hopefully
